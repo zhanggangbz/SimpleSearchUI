@@ -1,0 +1,117 @@
+﻿@using Microsoft.AspNetCore.Html
+@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+    var SearchResult = ViewBag.Result as SearchRespone;
+    string searchkey = SearchResult?.SearchKey;
+
+    string[] suffixes = new string[] { " B", " KB", " MB", " GB", " TB", " PB" };
+
+    string GetSizeStr(long size)
+    {
+        double last = 1;
+        for (int i = 0; i < suffixes.Length; i++)
+        {
+            var current = Math.Pow(1024, i + 1);
+            var temp = size / current;
+            if (temp < 1)
+            {
+                return (size / last).ToString("n2") + suffixes[i];
+            }
+            last = current;
+        }
+        return size.ToString();
+    }
+}
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>本地文件内容搜索</title>
+    <!-- ZUI 标准版压缩后的 CSS 文件 -->
+    <link rel="stylesheet" href="//cdn.bootcdn.net/ajax/libs/zui/1.10.0/css/zui.min.css">
+    <link rel="stylesheet" href="~/css/site.css">
+</head>
+<body>
+    <div class="container">
+        <div>
+            <div class="center-block search" style="text-align: center;"><h1>本地文件内容搜索</h1></div>
+        </div>
+        <div id="search">
+            <div class="input-group">
+                <div class="search-example input-control search-box search-box-circle has-icon-left has-icon-right "
+                     id="searchboxExample">
+                    <input id="searchInput" type="search" class="form-control search-input empty searchInputSize" value="@searchkey"
+                           placeholder="搜索">
+                    <label for="inputSearchExample3" class="input-control-icon-left search-icon">
+                        <i class="icon icon-search"></i>
+                    </label>
+                </div>
+                <span class="input-group-btn">
+                    <button id="searchbtn" class="btn btn-primary searchInputSize" type="button">搜索</button>
+                </span>
+            </div>
+        </div>
+
+        @if (SearchResult != null)
+        {
+            <div id="searchList">
+                <div class="list">
+                    <header>
+                        <h3><i class="icon-list-ul"></i> 搜索结果 <small>共 @SearchResult.Count 条 ,耗时 @SearchResult.TimeSpeed 秒</small></h3>
+                    </header>
+                    <div class="items items-hover">
+                        @foreach (var item in SearchResult.CurrentDatas)
+                        {
+
+                            <div class="item">
+                                <div class="item-heading">
+                                    <div class="pull-right label label-success">@item.Data.File.Extension</div>
+                                    <h4><a href="###">@item.Data.File.Filename</a></h4>
+                                </div>
+                                <div class="item-content">
+                                    <div class="text">
+                                        @(new HtmlString(item.ShowContent))
+                                    </div>
+                                </div>
+                                <div class="item-footer">
+                                    <i class="icon icon-folder-open-alt"></i>
+                                    <span class="text-gray">@item.Data.Path.Real</span>
+                                </div>
+                                <div class="item-footer">
+                                    <div class="pull-right">
+                                        <i class="icon icon-bar-chart-alt"></i>
+                                        <span class="text-muted">@GetSizeStr(item.Data.File.Filesize)
+                                    </div>
+
+                                    <i class="icon icon-bookmark"></i>
+                                    <span class="text-muted">@item.Data.File.Last_modified</span>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                    <footer>
+                        <ul class="pager" data-ride="pager" data-page="@SearchResult.CurrentPageIndex" data-rec-total="@SearchResult.Count" data-link-creator="/?key=@SearchResult.SearchKey&pageindex={page}"></ul>
+                    </footer>
+                </div>
+            </div>
+        }
+    </div>
+
+    <!-- ZUI Javascript 依赖 jQuery -->
+    <script src="//cdn.bootcdn.net/ajax/libs/zui/1.10.0/lib/jquery/jquery.js"></script>
+    <!-- ZUI 标准版压缩后的 JavaScript 文件 -->
+    <script src="//cdn.bootcdn.net/ajax/libs/zui/1.10.0/js/zui.min.js"></script>
+    <script>
+        $("#searchbtn").click(function () {
+            var key = $("#searchInput").val();
+            if (key != '') {
+                window.location.href = "/?key=" + key;
+            }
+        });
+    </script>
+</body>
+</html>
