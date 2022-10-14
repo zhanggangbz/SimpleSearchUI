@@ -21,6 +21,7 @@ namespace SimpleSearchUI.Models.Nest
             var settings = new ConnectionSettings(new Uri("http://192.168.0.190:9200")).DefaultIndex("ftp");
 
             ElasticClient = new ElasticClient(settings);
+
         }
 
         public SearchRespone SearchData(string key,int pageIndex)
