@@ -18,7 +18,7 @@ namespace SimpleSearchUI.Models.Nest
         {
             _logger = logger;
 
-            var settings = new ConnectionSettings(new Uri("http://192.168.0.190:9200")).DefaultIndex("test");
+            var settings = new ConnectionSettings(new Uri("http://192.168.0.190:9200")).DefaultIndex("ftp");
 
             ElasticClient = new ElasticClient(settings);
         }
@@ -29,8 +29,28 @@ namespace SimpleSearchUI.Models.Nest
 
             var watch = Stopwatch.StartNew();
 
-            var rs = ElasticClient.Search((SearchDescriptor<ESTest> s) => s.From(startIndex).Size(10).Query((QueryContainerDescriptor<ESTest> q) => q.MatchPhrase((MatchPhraseQueryDescriptor<ESTest> q1) => q1.Field((ESTest f) => f.Content).Query(key)))
-            .Highlight((HighlightDescriptor<ESTest> h) => h.PreTags("<strong class=\"text-danger\">").PostTags("</strong>").Fields((HighlightFieldDescriptor<ESTest> fh) => fh.Field((ESTest fhf) => fhf.Content))));
+            var kps = key.Split(' ');
+
+            QueryContainer wholeWordQuery = null;
+
+            foreach (var k1 in kps)
+            {
+                if (!string.IsNullOrWhiteSpace(k1))
+                {
+                    wholeWordQuery |= new MatchPhraseQuery() { Field = "content", Query = k1 };
+                    wholeWordQuery |= new MatchPhraseQuery() { Field = "file.filename", Query = k1 };
+                }
+            }
+
+            var rs = ElasticClient.Search<ESTest>(s => s
+                .Query(q => wholeWordQuery).From(startIndex)
+                .Size(10)
+                .Highlight(h => h
+                    .PreTags("<strong class=\"text-danger\">")
+                    .PostTags("</strong>")
+                    .Fields(fh => fh.Field(fw => fw.Content), fh => fh.Field(fw => fw.File.Filename))
+                )
+            );
 
             watch.Stop();
 
@@ -58,6 +78,19 @@ namespace SimpleSearchUI.Models.Nest
                         foreach (var item2 in item.Highlight["content"])
                         {
                             sitem.ShowContent += item2;
+                        }
+                    }
+
+                    sitem.ShowFileName = item.Source.File.Filename;
+
+                    if (item.Highlight.ContainsKey("file.filename"))
+                    {
+                        foreach (var k1 in kps)
+                        {
+                            if (!string.IsNullOrWhiteSpace(k1))
+                            {
+                                sitem.ShowFileName = sitem.ShowFileName.Replace(k1,$"<strong class=\"text-danger\">{k1}</strong>");
+                            }
                         }
                     }
                 }

@@ -70,7 +70,7 @@
                             <div class="item">
                                 <div class="item-heading">
                                     <div class="pull-right label label-success">@item.Data.File.Extension</div>
-                                    <h4><a href="###">@item.Data.File.Filename</a></h4>
+                                    <h4><a href="###">@(new HtmlString(item.ShowFileName))</a></h4>
                                 </div>
                                 <div class="item-content">
                                     <div class="text">
@@ -84,11 +84,11 @@
                                 <div class="item-footer">
                                     <div class="pull-right">
                                         <i class="icon icon-bar-chart-alt"></i>
-                                        <span class="text-muted">@GetSizeStr(item.Data.File.Filesize)
+                                        <span class="text-muted">@GetSizeStr(item.Data.File.Filesize)</span>
                                     </div>
 
                                     <i class="icon icon-bookmark"></i>
-                                    <span class="text-muted">@item.Data.File.Last_modified</span>
+                                    <span class="text-muted">最后更新于:@item.Data.File.Last_modified</span>
                                 </div>
                             </div>
                         }

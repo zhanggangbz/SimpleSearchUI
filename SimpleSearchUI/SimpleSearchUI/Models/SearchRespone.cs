@@ -23,6 +23,7 @@ namespace SimpleSearchUI.Models
 
     public class SearchItem
     {
+        public string ShowFileName { get; set; }
         public string ShowContent { get; set; }
 
         public ESTest Data { get; set; }
