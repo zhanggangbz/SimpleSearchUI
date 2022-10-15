@@ -23,6 +23,13 @@
         }
         return size.ToString();
     }
+
+    List<string> IndexNames = ViewBag.IndexNames as List<string>;
+    string CurrentIndexName = ViewBag.CurrentIndexName as string;
+    if (string.IsNullOrWhiteSpace(CurrentIndexName) && IndexNames != null && IndexNames.Count > 0)
+    {
+        CurrentIndexName = IndexNames[0];
+    }
 }
 <!DOCTYPE html>
 <html lang="zh-cn">
@@ -54,50 +61,70 @@
                     <button id="searchbtn" class="btn btn-primary searchInputSize" type="button">搜索</button>
                 </span>
             </div>
+            <form  class="form-inline" style="padding-top:20px">
+                <div class="form-group">
+                    <label for="picker3" style="font-size:15px">数据来源：</label>
+                    <select name="picker3" id="picker3" class="form-control">
+                        @if (IndexNames != null) foreach (var item in IndexNames)
+                        {
+                            <option value="@item" >@item</option>
+                        }
+                    </select>
+                </div>
+                <button type="button" class="btn btn-primary" data-toggle="collapse" data-target="#collapseExample">其他设置</button>
+            </form>
+
+                <div class="collapse" id="collapseExample">
+                    <div class="bg-primary with-padding">
+                        <p>这里可以设置其他选项</p>
+                        <p>这里可以设置其他选项。</p>
+                    </div>
+                </div>
         </div>
 
         @if (SearchResult != null)
         {
-            <div id="searchList">
-                <div class="list">
-                    <header>
-                        <h3><i class="icon-list-ul"></i> 搜索结果 <small>共 @SearchResult.Count 条 ,耗时 @SearchResult.TimeSpeed 秒</small></h3>
-                    </header>
-                    <div class="items items-hover">
+                <div id="searchList">
+                    <div class="list">
+                        <header>
+                            <h3><i class="icon-list-ul"></i> 搜索结果 <small>共 @SearchResult.Count 条 ,耗时 @SearchResult.TimeSpeed 秒</small></h3>
+                        </header>
+                        <div class="items items-hover">
                         @foreach (var item in SearchResult.CurrentDatas)
                         {
 
-                            <div class="item">
-                                <div class="item-heading">
-                                    <div class="pull-right label label-success">@item.Data.File.Extension</div>
-                                    <h4><a href="###">@(new HtmlString(item.ShowFileName))</a></h4>
-                                </div>
-                                <div class="item-content">
-                                    <div class="text">
+                                    <div class="item">
+                                        <div class="item-heading">
+                                            <div class="pull-right label label-success">@item.Data.File.Extension</div>
+                                            <h4><a href="###">@(new HtmlString(item.ShowFileName))</a></h4>
+                                        </div>
+                                        <div class="item-content">
+                                            <div class="text">
                                         @(new HtmlString(item.ShowContent))
-                                    </div>
-                                </div>
-                                <div class="item-footer">
-                                    <i class="icon icon-folder-open-alt"></i>
-                                    <span class="text-gray">@item.Data.Path.Real</span>
-                                </div>
-                                <div class="item-footer">
-                                    <div class="pull-right">
-                                        <i class="icon icon-bar-chart-alt"></i>
-                                        <span class="text-muted">@GetSizeStr(item.Data.File.Filesize)</span>
-                                    </div>
+                                            </div>
+                                        </div>
+                                        <div class="item-footer">
+                                            <i class="icon icon-folder-open-alt"></i>
+                                            <span class="text-gray">@item.Data.Path.Real</span>
+                                        </div>
+                                        <div class="item-footer">
+                                            <div class="pull-right">
+                                                <i class="icon icon-bar-chart-alt"></i>
+                                                <span class="text-muted">@GetSizeStr(item.Data.File.Filesize)</span>
+                                            </div>
 
-                                    <i class="icon icon-bookmark"></i>
-                                    <span class="text-muted">最后更新于:@item.Data.File.Last_modified</span>
-                                </div>
-                            </div>
+                                            <i class="icon icon-bookmark"></i>
+                                            <span class="text-muted">最后更新于:@item.Data.File.Last_modified</span>
+                                        </div>
+                                    </div>
                         }
+                        </div>
+                        <footer>
+                            <ul class="pager" data-ride="pager" data-page="@SearchResult.CurrentPageIndex" data-rec-total="@SearchResult.Count" 
+                        data-link-creator="/?key=@SearchResult.SearchKey&pageindex={page}&indexname=@CurrentIndexName"></ul>
+                        </footer>
                     </div>
-                    <footer>
-                        <ul class="pager" data-ride="pager" data-page="@SearchResult.CurrentPageIndex" data-rec-total="@SearchResult.Count" data-link-creator="/?key=@SearchResult.SearchKey&pageindex={page}"></ul>
-                    </footer>
                 </div>
-            </div>
         }
     </div>
 
@@ -109,18 +136,20 @@
         $("#searchbtn").click(function () {
             var key = $("#searchInput").val();
             if (key != '') {
-                window.location.href = "/?key=" + key;
+                window.location.href = "/?key=" + key + "&indexname=" + $("#picker3").val();
             }
         });
 
-        $('#searchInput').searchBox({
+        $("#searchInput").searchBox({
             onPressEnter: function(event) {
                 var key = $("#searchInput").val();
                 if (key != '') {
-                    window.location.href = "/?key=" + key;
+                    window.location.href = "/?key=" + key + "&indexname=" + $("#picker3").val();
                 }
             }
         })
+
+        $("#picker3").val("@CurrentIndexName");
     </script>
 </body>
 </html>

@@ -17,14 +17,18 @@ namespace SimpleSearchUI.Controllers
             _elasticsearchApi = elasticsearch;
         }
 
-        public IActionResult Index(string key = "", int? pageindex = null)
+        public IActionResult Index(string key = "", int? pageindex = null, string indexname = null)
         {
-            if (!string.IsNullOrWhiteSpace(key))
+            if (!string.IsNullOrWhiteSpace(key)&& !string.IsNullOrWhiteSpace(indexname))
             {
                 if (pageindex == null) pageindex = 1;
 
-                ViewBag.Result = _elasticsearchApi.SearchData(key, pageindex.Value);
+                ViewBag.Result = _elasticsearchApi.SearchData(key, pageindex.Value, indexname);
             }
+
+            ViewBag.IndexNames = _elasticsearchApi.GetAllIndexName();
+
+            ViewBag.CurrentIndexName = indexname;
 
             return View();
         }

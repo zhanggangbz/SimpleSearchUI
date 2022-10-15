@@ -18,13 +18,13 @@ namespace SimpleSearchUI.Models.Nest
         {
             _logger = logger;
 
-            var settings = new ConnectionSettings(new Uri("http://192.168.0.190:9200")).DefaultIndex("ftp");
+            var settings = new ConnectionSettings(new Uri("http://192.168.0.190:9200"));
 
             ElasticClient = new ElasticClient(settings);
 
         }
 
-        public SearchRespone SearchData(string key,int pageIndex)
+        public SearchRespone SearchData(string key,int pageIndex,string indexName)
         {
             int startIndex = pageIndex * 10 - 10;
 
@@ -45,6 +45,7 @@ namespace SimpleSearchUI.Models.Nest
 
             var rs = ElasticClient.Search<ESTest>(s => s
                 .Query(q => wholeWordQuery).From(startIndex)
+                .Index(indexName)
                 .Size(10)
                 .Highlight(h => h
                     .PreTags("<strong class=\"text-danger\">")
@@ -100,6 +101,24 @@ namespace SimpleSearchUI.Models.Nest
             }
 
             return result;
+        }
+
+        public List<string> GetAllIndexName()
+        {
+            List<string> list = new List<string>();
+            var rs = ElasticClient.Cat.Indices();
+
+            if(rs != null && rs.Records!=null)
+            {
+                foreach(var item in rs.Records)
+                {
+                    if(item!=null && !item.Index.Contains('.') && !item.Index.Contains("_folder"))
+                    {
+                        list.Add(item.Index);
+                    }
+                }
+            }
+            return list;
         }
     }
 }
