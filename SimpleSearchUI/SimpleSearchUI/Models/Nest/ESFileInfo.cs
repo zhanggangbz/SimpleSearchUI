@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Nest;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -37,7 +38,14 @@ namespace SimpleSearchUI.Models.Nest
         public DateTime Indexing_date { get; set; }
         public long Filesize { get; set; }
         public string Filename { get; set; }
+
+        public Filename filename { get; set; }
         public string Url { get; set; }
+    }
+
+    public class Filename
+    {
+        public string text { get; set; }
     }
 
     public class ESPath

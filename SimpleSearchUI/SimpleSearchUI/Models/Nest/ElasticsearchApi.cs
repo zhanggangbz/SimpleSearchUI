@@ -21,7 +21,6 @@ namespace SimpleSearchUI.Models.Nest
             var settings = new ConnectionSettings(new Uri("http://192.168.0.190:9200"));
 
             ElasticClient = new ElasticClient(settings);
-
         }
 
         public SearchRespone SearchData(string key,int pageIndex,string indexName)
@@ -39,7 +38,7 @@ namespace SimpleSearchUI.Models.Nest
                 if (!string.IsNullOrWhiteSpace(k1))
                 {
                     wholeWordQuery |= new MatchPhraseQuery() { Field = "content", Query = k1 };
-                    wholeWordQuery |= new MatchPhraseQuery() { Field = "file.filename", Query = k1 };
+                    wholeWordQuery |= new MatchPhraseQuery() { Field = "file.filename.text", Query = k1 };
                 }
             }
 
@@ -50,7 +49,7 @@ namespace SimpleSearchUI.Models.Nest
                 .Highlight(h => h
                     .PreTags("<strong class=\"text-danger\">")
                     .PostTags("</strong>")
-                    .Fields(fh => fh.Field(fw => fw.Content), fh => fh.Field(fw => fw.File.Filename))
+                    .Fields(fh => fh.Field(fw => fw.Content), fh => fh.Field(fw => fw.File.filename.text))
                 )
             );
 
@@ -73,7 +72,9 @@ namespace SimpleSearchUI.Models.Nest
                     Data = item.Source
                 };
 
-                if(item.Highlight!=null && item.Highlight.Count > 0)
+                sitem.ShowFileName = item.Source.File.Filename;
+
+                if (item.Highlight!=null && item.Highlight.Count > 0)
                 {
                     if (item.Highlight.ContainsKey("content"))
                     {
@@ -83,9 +84,7 @@ namespace SimpleSearchUI.Models.Nest
                         }
                     }
 
-                    sitem.ShowFileName = item.Source.File.Filename;
-
-                    if (item.Highlight.ContainsKey("file.filename"))
+                    if (item.Highlight.ContainsKey("file.filename.text"))
                     {
                         foreach (var k1 in kps)
                         {
@@ -118,6 +117,7 @@ namespace SimpleSearchUI.Models.Nest
                     }
                 }
             }
+
             return list;
         }
     }
