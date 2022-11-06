@@ -95,7 +95,6 @@ namespace SimpleSearchUI.Models.Nest
                         }
                     }
                 }
-
                 result.CurrentDatas.Add(sitem);
             }
 
